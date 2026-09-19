@@ -6,4 +6,8 @@ set(CMAKE_C_STANDARD 99)
 add_executable(
         Dungeon
         main.c
+        map.c
+        map.h
+        run.h
+        run.c
 )
