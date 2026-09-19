@@ -14,7 +14,7 @@ void run_game() {
     while (is_running) {
         printf("\n");
         printf("Turn: %d" , m_count);
-        scanf("%s15\n", command);
+        scanf("%15s\n", command);
         if (strcmp(command, "quit") == 0) {
             printf("You left game");
             is_running = false;
