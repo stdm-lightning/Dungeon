@@ -24,7 +24,6 @@ int main(void) {
             printf("You left game");
             is_running = false;
         }
-
     }
 
 }
