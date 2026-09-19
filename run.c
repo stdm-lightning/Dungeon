@@ -13,8 +13,8 @@ void run_game() {
 
     while (is_running) {
         printf("\n");
-        printf("Turn: %d" , m_count);
-        scanf("%15s\n", command);
+        printf("Turn: %d\n" , m_count);
+        scanf("%15s", command);
         if (strcmp(command, "quit") == 0) {
             printf("You left game");
             is_running = false;
