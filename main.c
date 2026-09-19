@@ -1,3 +1,6 @@
-//
-// Created by stdm7 on 19.09.2026.
-//
+#include <stdio.h>
+
+int main() {
+    printf("Hello, World!\n");
+    return 0;
+}
