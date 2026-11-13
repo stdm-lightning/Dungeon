@@ -8,7 +8,6 @@ Map::Map(int w, int h) : width(w), height(h), cells(nullptr) {
     if (w <= 0 || h <= 0) {
         throw std::invalid_argument("Ошибка: недопустимые размеры карты.");
     }
-    // Выделяем память в конструкторе (RAII)
     cells = new char[width * height];
     for (int i = 0; i < width * height; ++i) {
         cells[i] = '.';
@@ -20,19 +19,18 @@ Map::Map(int w, int h) : width(w), height(h), cells(nullptr) {
 Map::~Map() {
     std::cout << "[RAII] Деструктор ~Map(" << width << "x" << height 
               << ") по адресу " << this << "\n";
-    // Единственное место освобождения памяти — деструктор
     delete[] cells;
     cells = nullptr;
 }
 
-Map::Map(Map&& other) noexcept 
+Map::Map(Map&& other)
     : width(other.width), height(other.height), cells(other.cells) {
     other.width = 0;
     other.height = 0;
     other.cells = nullptr;
 }
 
-Map& Map::operator=(Map&& other) noexcept {
+Map& Map::operator=(Map&& other){
     if (this != &other) {
         delete[] cells;
         width = other.width;
@@ -63,7 +61,6 @@ void Map::setCell(int x, int y, char c) {
 }
 
 bool Map::isWalkable(int x, int y) const {
-    // Сначала проверяем границы, затем содержимое клетки
     if (!isInside(x, y)) {
         return false;
     }
@@ -93,7 +90,6 @@ void Map::initDefaultRoom() {
             }
         }
     }
-    // Внутренние стены и золото
     if (width >= 8 && height >= 5) {
         setCell(3, 2, '#');
         setCell(4, 2, '#');
@@ -118,13 +114,8 @@ Map Map::loadFromFile(const std::string& filename) {
     }
 
     std::string dummy;
-    std::getline(file, dummy); // Считываем остаток первой строки
+    std::getline(file, dummy);
 
-    // Создаём объект карты на стеке.
-    // ВАЖНО (RAII): Память под клетки уже выделена в конструкторе `loadedMap`.
-    // Если ниже в цикле обнаружится ошибка в файле и будет выброшено исключение,
-    // при раскрутке стека автоматически вызовется деструктор `~Map()`,
-    // который освободит `cells`. Утечки памяти не произойдет ни на одном пути!
     Map loadedMap(w, h);
     bool heroFound = false;
     for (int y = 0; y < h; ++y) {
@@ -139,10 +130,9 @@ Map Map::loadFromFile(const std::string& filename) {
         for (int x = 0; x < w; ++x) {
             char c = line[x];
             if (c == '@') {
-                // Запоминаем, где нашли героя в файле
                 loadedMap.startHeroX = x;
                 loadedMap.startHeroY = y;
-                loadedMap.setCell(x, y, '.'); // На карту ставим пустой пол вместо @
+                loadedMap.setCell(x, y, '.');
                 heroFound = true;
             } else {
                 loadedMap.setCell(x, y, c);

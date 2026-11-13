@@ -1,7 +1,15 @@
 #include "hero.h"
 #include "map.h"
 #include <iostream>
-
+int Hero::getX() const {
+    return this->x;
+}
+int Hero::getY() const {
+    return this->y;
+}
+int Hero::getHp() const {
+    return this->hp;
+}
 Hero::Hero() : x(1), y(1), hp(100), maxHp(100), gold(0) {
     std::cout << "[RAII] Конструктор по умолчанию Hero() по адресу " << this << "\n";
 }
@@ -17,7 +25,7 @@ Hero::~Hero() {
 }
 
 void inspectCurrentTile(const Hero& hero, const Map& map) {
-    char cell = map.getCell(hero.x, hero.y);
+    char cell = map.getCell(hero.getX(), hero.getY() );
     if (cell == '$') {
         std::cout << "Под ногами блестит золото!\n";
     }
@@ -27,20 +35,16 @@ bool Hero::move(int dx, int dy, Map& map) {
     int targetX = this->x + dx;
     int targetY = this->y + dy;
 
-    // Герой спрашивает у карты, проходима ли целевая клетка
     if (!map.isWalkable(targetX, targetY)) {
         std::cout << "Там стена или край подземелья! Ход не потрачен.\n";
         return false;
     }
 
-    // Изменяем собственные координаты через указатель this
     this->x = targetX;
     this->y = targetY;
 
-    // Явное использование `this`: передаём сам объект (*this) во внешнюю функцию
     inspectCurrentTile(*this, map);
 
-    // Если на клетке золото — подбираем его и очищаем клетку карты
     if (map.getCell(this->x, this->y) == '$') {
         this->gold += 10;
         map.setCell(this->x, this->y, '.');

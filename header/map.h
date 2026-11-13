@@ -4,26 +4,22 @@
 #include <string>
 
 class Map {
-public:
+private:
     int width;
     int height;
     char* cells;
-
+public:
     int startHeroX = 1;
     int startHeroY = 1;
     
     Map(int w, int h);
 
     ~Map();
-
-    // Запрет копирования (Подсказка из Практики 10):
-    // Если класс владеет сырым указателем, копирование по умолчанию скопирует
-    // только адрес, и деструкторы двух объектов освободят один блок дважды (double free).
     Map(const Map&) = delete;
     Map& operator=(const Map&) = delete;
 
-    Map(Map&& other) noexcept;
-    Map& operator=(Map&& other) noexcept;
+    Map(Map&& other) ;
+    Map& operator=(Map&& other);
 
     bool isInside(int x, int y) const;
     char getCell(int x, int y) const;
@@ -31,12 +27,10 @@ public:
     bool isWalkable(int x, int y) const;
     void render(int heroX, int heroY) const;
 
-    // Загрузка базовой комнаты по умолчанию
     void initDefaultRoom();
 
-    // При ошибке в файле бросает исключение — объект карты не создается,
-    // а любая уже выделенная память гарантированно освобождается деструктором.
     static Map loadFromFile(const std::string& filename);
 };
+
 
 #endif // MAP_H

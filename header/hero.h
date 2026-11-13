@@ -4,13 +4,16 @@
 class Map;
 
 class Hero {
-public:
+private:
     int x;
     int y;
     int hp;
     int maxHp;
     int gold;
-
+public:
+    int getX() const ;
+    int getY() const ;
+    int getHp() const ;
     Hero();
 
     Hero(int startX, int startY, int startHp);

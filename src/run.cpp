@@ -16,9 +16,9 @@ void demonstrateObjectLifetime() {
     std::cout << "\n3. Входим во вложенный блок { ... }:\n";
     {
         Map blockMap(4, 4);
-        Hero defaultHero; // Проверка конструктора героя по умолчанию
+        Hero defaultHero;
         std::cout << "   Завершаем работу внутри вложенного блока...\n";
-    } // Здесь автоматически вызовутся ~Hero() и ~Map(4x4) в обратном порядке!
+    }
     std::cout << "4. Вышли из вложенного блока.\n";
 
     std::cout << "\n5. Явно удаляем объект в куче (delete heapMap):\n";
@@ -29,7 +29,6 @@ void demonstrateObjectLifetime() {
 }
 
 void runGame() {
-    // 1. Демонстрация конструкторов, деструкторов, стека, кучи и блоков
     demonstrateObjectLifetime();
 
     std::cout << "\n=== ПРОВЕРКА БЕЗОПАСНОЙ ЗАГРУЗКИ ПРИ ОШИБКЕ В ФАЙЛЕ ===\n";
@@ -42,7 +41,6 @@ void runGame() {
 
     std::cout << "\n=== ЗАПУСК ИГРЫ «ПОДЗЕМЕЛЬЕ» (C++17) ===\n";
 
-    // Загружаем карту из level.txt, а если файла нет — создаём стандартную комнату 10x6
     Map gameMap = [&]() {
         try {
             std::cout << "Попытка загрузки уровня из файла 'level.txt'...\n";
@@ -56,19 +54,17 @@ void runGame() {
         }
     }();
 
-    // Создаём героя через конструктор с параметрами
     gameMap = [&]() {
         try {
             return Map::loadFromFile("level.txt");
         } catch (...) {
             Map fallback(10, 6);
             fallback.initDefaultRoom();
-            fallback.startHeroX = 1; // Дефолтные координаты для запасной комнаты
+            fallback.startHeroX = 1;
             fallback.startHeroY = 1;
             return fallback;
         }
     }();
-    // Создаем героя в той точке, которая была указана в level.txt в символе '@'
     Hero hero(gameMap.startHeroX, gameMap.startHeroY, 100);
 
     int turnCount = 1;
@@ -78,7 +74,7 @@ void runGame() {
               << "look, status, hit N, quit (q)\n\n";
 
     while (isRunning) {
-        gameMap.render(hero.x, hero.y);
+        gameMap.render(hero.getX(), hero.getY());
         std::cout << "\n[Ход " << turnCount << "] Введите команду > ";
 
         std::string line;
@@ -136,11 +132,11 @@ void runGame() {
             std::cout << "Неизвестная команда. Подсказка: north, south, east, west, look, status, hit N, quit.\n";
         }
 
-        if (hero.hp <= 0) {
+        if (hero.getHp() <= 0) {
             std::cout << "\n========================================\n";
             std::cout << "        ВЫ МЕРТВЫ! ИГРА ОКОНЧЕНА.       \n";
             std::cout << "========================================\n";
-            isRunning = false; // Выход из игрового цикла
+            isRunning = false;
         }
 
         std::cout << "----------------------------------------\n";
