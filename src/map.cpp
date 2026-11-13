@@ -1,8 +1,8 @@
 #include "map.h"
+#include "creature.h"
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
-#include <vector>
 
 Map::Map(int w, int h) : width(w), height(h), cells(nullptr) {
     if (w <= 0 || h <= 0) {
@@ -12,25 +12,25 @@ Map::Map(int w, int h) : width(w), height(h), cells(nullptr) {
     for (int i = 0; i < width * height; ++i) {
         cells[i] = '.';
     }
-    std::cout << "[RAII] Конструктор Map(" << width << "x" << height 
+    std::cout << "[RAII] Конструктор Map(" << width << "x" << height
               << ") по адресу " << this << "\n";
 }
 
 Map::~Map() {
-    std::cout << "[RAII] Деструктор ~Map(" << width << "x" << height 
+    std::cout << "[RAII] Деструктор ~Map(" << width << "x" << height
               << ") по адресу " << this << "\n";
     delete[] cells;
     cells = nullptr;
 }
 
-Map::Map(Map&& other)
+Map::Map(Map&& other) noexcept
     : width(other.width), height(other.height), cells(other.cells) {
     other.width = 0;
     other.height = 0;
     other.cells = nullptr;
 }
 
-Map& Map::operator=(Map&& other){
+Map& Map::operator=(Map&& other) noexcept {
     if (this != &other) {
         delete[] cells;
         width = other.width;
@@ -41,6 +41,15 @@ Map& Map::operator=(Map&& other){
         other.cells = nullptr;
     }
     return *this;
+}
+
+int Map::getWidth() const { return width; }
+int Map::getHeight() const { return height; }
+
+void Map::validateCoords(int x, int y) const {
+    if (!isInside(x, y)) {
+        throw std::out_of_range("Координаты выходят за пределы карты!");
+    }
 }
 
 bool Map::isInside(int x, int y) const {
@@ -67,17 +76,8 @@ bool Map::isWalkable(int x, int y) const {
     return getCell(x, y) != '#';
 }
 
-void Map::render(int heroX, int heroY) const {
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            if (x == heroX && y == heroY) {
-                std::cout << '@';
-            } else {
-                std::cout << getCell(x, y);
-            }
-        }
-        std::cout << '\n';
-    }
+void Map::render(int heroX, int heroY, const std::vector<std::unique_ptr<Creature>>& monsters) const {
+    MapRenderer::render(*this, heroX, heroY, monsters);
 }
 
 void Map::initDefaultRoom() {
@@ -106,7 +106,7 @@ Map Map::loadFromFile(const std::string& filename) {
 
     int w = 0, h = 0;
     if (!(file >> w >> h)) {
-        throw std::runtime_error("повреждённый формат заголовка (ожидались ширина и высота).");
+        throw std::runtime_error("повреждённый формат заголовка.");
     }
 
     if (w <= 2 || h <= 2 || w > 200 || h > 200) {
@@ -117,7 +117,6 @@ Map Map::loadFromFile(const std::string& filename) {
     std::getline(file, dummy);
 
     Map loadedMap(w, h);
-    bool heroFound = false;
     for (int y = 0; y < h; ++y) {
         std::string line;
         if (!std::getline(file, line)) {
@@ -133,7 +132,6 @@ Map Map::loadFromFile(const std::string& filename) {
                 loadedMap.startHeroX = x;
                 loadedMap.startHeroY = y;
                 loadedMap.setCell(x, y, '.');
-                heroFound = true;
             } else {
                 loadedMap.setCell(x, y, c);
             }
@@ -141,4 +139,32 @@ Map Map::loadFromFile(const std::string& filename) {
     }
 
     return loadedMap;
+}
+
+void MapRenderer::render(const Map& map, int heroX, int heroY, const std::vector<std::unique_ptr<Creature>>& monsters) {
+    int h = map.getHeight();
+    int w = map.getWidth();
+
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+            if (x == heroX && y == heroY) {
+                std::cout << '@';
+                continue;
+            }
+
+            char symbolToPrint = map.getCell(x, y);
+            bool monsterFound = false;
+
+            for (const auto& m : monsters) {
+                if (m && m->getX() == x && m->getY() == y && m->isAlive()) {
+                    symbolToPrint = m->getSymbol();
+                    monsterFound = true;
+                    break;
+                }
+            }
+
+            std::cout << symbolToPrint;
+        }
+        std::cout << '\n';
+    }
 }

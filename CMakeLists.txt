@@ -16,4 +16,6 @@ add_executable(DungeonC__
         src/run.cpp
         header/run.h
         header/run.h
+        src/creature.cpp
+        header/creature.h
 )
