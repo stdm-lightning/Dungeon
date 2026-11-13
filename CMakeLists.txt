@@ -8,4 +8,5 @@ include_directories(.)
 add_executable(dynamic_massiv_project
         dynamic_array.c
         dynamic_array.h
+        main.c
         )
